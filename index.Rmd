@@ -1,0 +1,273 @@
+---
+title: "Actividades y resultados recientes"
+author: "Ecuestas Macroeconómicas"
+date: "Septiembre 2020"
+output: 
+    ioslides_presentation:
+        widescreen: true
+        logo: "bcrd_left.png"
+        css: style.css
+---
+
+
+<script>
+    $(document).ready(function() {
+    $('slide:not(.title-slide, .backdrop, .segue)').append('<footer></footer>');    
+    $('footer').attr('label', 'División de Encuestas Macroeconómicas');
+
+  })
+</script>
+
+<style>
+  footer:after {
+    font-size: 12pt;
+    content: attr(label);
+    position: absolute;
+    margin-left: auto;
+    margin-right: auto;
+    left: 0;
+    right: 0;
+    text-align:center;
+    bottom: 20px;
+    line-height: 1.9;
+    display: block;
+  }
+</style>
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+# Paquetes
+library(here)
+library(plotly)
+library(dygraphs)
+library(tidyverse)
+library(lubridate)
+library(kableExtra)
+library(formattable)
+library(sparkline)
+
+# Cargando workspaces
+load(here('data', 'eem', 'eem_ws'))
+load(here('data', 'eoe', 'eoe_ws'))
+
+Sys.setlocale("LC_TIME", "Spanish")
+
+sparkline(0)
+```
+<!--- --------------------------------------------------------------------------------------->
+## Contenido
+
+- Actividades recientes <br><br>
+- Resultados encuestas macroeconómicas <br><br>
+- Actividades en agenda <br>
+
+<!--- --------------------------------------------------------------------------------------->
+## Actividades recientes
+
+- Levantamiento de la EOE trimestral abril-junio 2020<br><br>
+
+- Proceso administrativo para reanudación de levantamiento de encuesta de confianza del consumidor<br><br>
+
+- Levantamieno y procesamiento de las encuestas mensuales EEM y EOE<br><br>
+
+- Recepción de base de datos de viviendas por parte de Regulación<br><br>
+
+<!--- --------------------------------------------------------------------------------------->
+<!--- --------------------------------------------------------------------------------------->
+# Encuesta de Expectativas Macroeconómicas
+
+<!--- --------------------------------------------------------------------------------------->
+## Inflación {.smaller}
+
+<style>
+  article {margin-top: 10px;}
+  ul {font-size:24px;}
+</style>
+
+- Repunte de la expectativas para fin de año influenciado por la evolución reciente de los precios
+
+- Se mantiene el anclaje de las expectativas mediano plazo
+
+<div class='container' style='display:flex;'>
+<div>
+```{r boxplot_inflacion_2020, fig.width=5, fig.height=4}
+ggplotly(boxplot_inflacion_diciembre2020 + labs(title = 'Expectativas de inflación para el 2020')) %>% 
+  plotly::config(displayModeBar = F)
+```
+</div>
+
+<div>
+```{r desviacion_inflacion, fig.width=5, fig.height=4}
+ggplotly(desviacion_inflacion + labs(title = "Desviaciónde las expectativas  respecto a la meta")) %>% 
+  plotly::config(displayModeBar = F)
+
+```
+</div>
+</div>
+
+<!--- --------------------------------------------------------------------------------------->
+## Crecimiento del PIB {.smaller}
+
+- Se mantiene el deterioro de las expectativas de crecimiento del 2020
+- Aumento de la incertidumbre respecto al crecimiento del 2021, pero se mantiene sobre una variación de 4%
+
+<div class='container' style='display:flex;'>
+<div>
+```{r crecimiento2020, fig.width=5.2, fig.height=4}
+ggplotly(expectativas_crecimiento_2020 + labs(title = 'Evolución expectativas de crecimiento 2020')) %>% 
+  plotly::config(displayModeBar = F)
+```
+</div>
+
+<div>
+```{r crecimiento2021, fig.width=5.2, fig.height=4}
+ggplotly(expectativas_crecimiento_2021 + labs(title = "Expectativas de crecimiento 2021")) %>% 
+  plotly::config(displayModeBar = F)
+
+```
+</div>
+</div>
+
+<!--- --------------------------------------------------------------------------------------->
+## Tipo de cambio {.smaller}
+
+- Depreciación implícita del tipo de cambio se mantiene elevada hacia hacia el final del 2020, auque tiende a valor medio de los últimos años.
+
+- Repunte de los pronósticos de tipo de cambio a 12 y 24 meses
+
+
+<div class='container' style='display:flex;'>
+<div>
+```{r deprecion_tcambio, fig.width=5.2, fig.height=4}
+ggplotly(plot_depreciacion + labs(title = 'Depreción implícita según horizonte'), tooltip = 'text') %>% 
+  plotly::config(displayModeBar = F)
+```
+</div>
+
+<div>
+```{r evolucion_tcambio, fig.width=5.2, fig.height=4}
+ggplotly(expectativas_tcambio + labs(title = "Evolución expectativas de tipo de cambio")) %>% 
+  layout(legend = list(orientation = "h", x = 0.01)) %>% 
+  plotly::config(displayModeBar = F)
+
+```
+</div>
+</div>
+
+<!--- --------------------------------------------------------------------------------------->
+## Expectativas CODIV-19 {.smaller}
+
+### Expectativas de estabilización de variables tras choque por COVID-19
+```{r fig.align='center', fig.width=10}
+p_eem <- tiempo_eem %>% 
+  mutate(
+    periodo = lubridate::ymd(paste('2020', crear_mes(mes), "01")),
+    end = periodo + months(tiempo),
+    label = paste(month(end, label = TRUE), year(end), sep = '-')
+         ) %>%
+  count(variable, end, label, sector, name = 'Frecuencia') %>% 
+  ggplot(aes(x = end, y = variable, fill = Frecuencia, text = label)) +
+  geom_tile(size = 0.2, color = 'white') +
+  scale_fill_viridis_c(direction = -1, labels = function(x) round(x)) +
+  facet_wrap(~sector, scales = 'free_y', ncol = 1) +
+  theme_light() +
+  theme(legend.position = 'bottom') +
+  labs(x = NULL, y = NULL)
+
+plotly::ggplotly(p_eem, tooltip = c('fill', 'text')) %>% 
+  plotly::config(displayModeBar = F)
+```
+
+
+<!--- --------------------------------------------------------------------------------------->
+<!--- --------------------------------------------------------------------------------------->
+# Encuesta de Opinión Empresarial
+
+<!--- --------------------------------------------------------------------------------------->
+## Situación económica, producción y pedidos
+
+- Mejora notable en el indicador de la situación económica de las empresas
+- La producción se mantiene positiva, pero los pedidos se contraen
+
+<div class='container'>
+<div>
+```{r fig.width=5.2, fig.height=3.5}
+ eoe_long %>% 
+  filter(variable == "Situación económica") %>%
+  select(saldo) %>% 
+  mutate(saldo  = round(saldo, 1)) %>% 
+  setNames(c("Situación económica")) %>% 
+  ts(start = c(2006, 07), frequency = 12) %>% 
+  dygraphs::dygraph(main = 'Situación económica del sector industrial') %>%
+  dygraphs::dySeries("Situación económica", 
+                     color = params$color_primary, 
+                     strokeWidth = params$strokesize) %>% 
+  dygraphs::dyRangeSelector(dateWindow = params$window_range)
+```
+</div>
+<div>
+```{r fig.width=5.2, fig.height=3.5}
+ eoe_long %>% 
+  filter(variable %in% c("Producción", "Pedidos")) %>% 
+  select(periodo, variable, saldo) %>% 
+  pivot_wider(names_from = variable, values_from = saldo) %>% 
+  select(-periodo) %>% 
+  mutate_all(round, digits = 2) %>% 
+  ts(start = c(2006, 7), frequency = 12) %>% 
+  dygraphs::dygraph(main = "Producción y pedidos") %>% 
+  dygraphs::dySeries(
+    "Producción", strokeWidth = params$strokesize,
+    color = params$color_primary) %>%
+  dySeries(
+    "Pedidos", strokeWidth = params$strokesize_secondary, 
+    strokePattern = "dashed", color = "black") %>% 
+  dygraphs::dyRangeSelector(dateWindow = params$window_range) %>% 
+  dyLegend(width = 410)
+```
+</div>
+</div>
+
+<!--- --------------------------------------------------------------------------------------->
+## Indicador de clima y confianza industrial
+
+- Se acelera la recuperación del clima empresarial del sector industrial
+- El indicador de confianza industrial se mantienen estable, aunque sigue por debajo del registrado en el mismo mes del año anterior.
+
+<div class='container'>
+<div>
+```{r fig.width=5.2, fig.height=3.5}
+( eoe_long %>% 
+  filter(variable %in% c("Índice de Confianza Industrial")) %>%
+  select(saldo) %>% 
+  setNames(c("ICI")) %>% 
+  ts(start = c(2006, 07), frequency = 12) %>% 
+  dygraphs::dygraph(main = 'Índice de Confianza Industrial') %>%
+  dygraphs::dySeries("ICI", color = params$color_primary) %>% 
+  dygraphs::dyRangeSelector(dateWindow = params$window_range) %>% 
+  dyBarChart())
+```
+</div>
+<div>
+```{r fig.width=5.2, fig.height=3.5}
+ eoe_long %>% 
+  filter(variable %in% c("Índice de Clima Empresarial")) %>%
+  select(saldo) %>% 
+  setNames(c("ICE")) %>% 
+  ts(start = c(2006, 07), frequency = 12) %>% 
+  dygraphs::dygraph(main = "Índice de Clima Empresarial") %>%
+  dygraphs::dySeries("ICE", color = params$color_primary) %>% 
+  dygraphs::dyRangeSelector(dateWindow = c("2018-12-20", "2020-8-25")) %>% 
+  dyBarChart()
+```
+</div>
+</div>
+
+<!--- 
+## Cuadro resumen EOE agosto 2020
+```{r}
+tabla_draft
+```
+--------------------------------------------------------------------------------------->
+## Actividades en agenda
